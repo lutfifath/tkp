@@ -11,13 +11,11 @@
         }
         
         body {
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
-            touch-action: pan-y pinch-zoom; /* Allow vertical scrolling but enable horizontal gestures */
-            -webkit-user-select: none; /* Prevent text selection during swipe */
-            user-select: none;
         }
         
         .slide {
@@ -27,6 +25,8 @@
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         
         .slide.active {
@@ -169,12 +169,12 @@
         @media (max-width: 640px) {
             .slide {
                 padding-top: 3rem;
-                padding-bottom: 3rem;
+                padding-bottom: 5rem;
             }
             
             /* Add swipe hint on mobile */
             .slide.active::after {
-                content: '← Swipe →';
+                content: '← Swipe → | ↕ Scroll';
                 position: fixed;
                 bottom: 4rem;
                 left: 50%;
@@ -1144,17 +1144,19 @@
             }
         });
         
-        // Enhanced Touch/swipe support with visual feedback
+        // Enhanced Touch/swipe support with vertical scroll detection
         let touchStartX = 0;
         let touchEndX = 0;
         let touchStartY = 0;
         let touchEndY = 0;
         let isSwiping = false;
+        let isVerticalScroll = false;
         
         document.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
             touchStartY = e.changedTouches[0].screenY;
             isSwiping = true;
+            isVerticalScroll = false;
         }, { passive: true });
         
         document.addEventListener('touchmove', (e) => {
@@ -1162,12 +1164,17 @@
             
             const touchCurrentX = e.changedTouches[0].screenX;
             const touchCurrentY = e.changedTouches[0].screenY;
-            const diffX = touchStartX - touchCurrentX;
-            const diffY = touchStartY - touchCurrentY;
+            const diffX = Math.abs(touchStartX - touchCurrentX);
+            const diffY = Math.abs(touchStartY - touchCurrentY);
             
-            // If horizontal swipe is more dominant than vertical
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                e.preventDefault(); // Prevent vertical scrolling during horizontal swipe
+            // Determine if this is a vertical or horizontal swipe
+            if (diffY > diffX && diffY > 10) {
+                isVerticalScroll = true;
+            }
+            
+            // Only prevent default if it's a horizontal swipe (for slide change)
+            if (!isVerticalScroll && diffX > diffY && diffX > 10) {
+                e.preventDefault();
             }
         }, { passive: false });
         
@@ -1176,17 +1183,24 @@
             
             touchEndX = e.changedTouches[0].screenX;
             touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
+            
+            // Only handle swipe if it wasn't a vertical scroll
+            if (!isVerticalScroll) {
+                handleSwipe();
+            }
+            
             isSwiping = false;
+            isVerticalScroll = false;
         }, { passive: true });
         
         function handleSwipe() {
             const swipeThreshold = 50; // Minimum swipe distance
             const diffX = touchStartX - touchEndX;
-            const diffY = touchStartY - touchEndY;
+            const diffY = Math.abs(touchStartY - touchEndY);
             
             // Only trigger if horizontal swipe is more significant than vertical
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > swipeThreshold) {
+            // AND the vertical movement is minimal
+            if (Math.abs(diffX) > swipeThreshold && diffY < 50) {
                 if (diffX > 0) {
                     // Swipe left - next slide
                     nextSlide();
