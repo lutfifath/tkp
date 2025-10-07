@@ -6,61 +6,176 @@
     <title>Evaluasi UX Tokopedia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             overflow: hidden;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
         }
+        
         .slide {
             display: none;
             min-height: 100vh;
+            min-height: 100dvh;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
+        
         .slide.active {
             display: flex;
             opacity: 1;
         }
+        
         .fade-in {
             animation: fadeIn 0.6s ease-in;
         }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
         .progress-bar {
             height: 4px;
             background: linear-gradient(to right, #10b981, #059669);
             transition: width 0.3s ease;
         }
+        
         .score-circle {
             position: relative;
-            width: 120px;
-            height: 120px;
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(80px, 15vw, 120px);
         }
+        
         .score-circle svg {
             transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
         }
+        
         .score-circle circle {
             fill: none;
             stroke-width: 8;
             stroke-linecap: round;
         }
+        
         .bg-circle {
             stroke: #e5e7eb;
         }
+        
         .progress-circle {
             stroke: #10b981;
             stroke-dasharray: 339.292;
             stroke-dashoffset: 339.292;
             transition: stroke-dashoffset 1s ease;
         }
-        @media (min-width: 640px) {
-            .slide { padding: 1.5rem; }
-            .score-circle { width: 100px; height: 100px; }
+        
+        /* Responsive navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 50;
+            display: flex;
+            gap: 0.5rem;
         }
-        @media (min-width: 1024px) {
-            .slide { padding: 2rem; }
-            .score-circle { width: 120px; height: 120px; }
+        
+        .nav-controls button {
+            padding: 0.75rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .nav-controls svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            z-index: 50;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-size: 0.875rem;
+        }
+        
+        /* Responsive text sizes */
+        .text-responsive-6xl {
+            font-size: clamp(2rem, 8vw, 3.75rem);
+        }
+        
+        .text-responsive-5xl {
+            font-size: clamp(1.75rem, 6vw, 3rem);
+        }
+        
+        .text-responsive-4xl {
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+        }
+        
+        .text-responsive-3xl {
+            font-size: clamp(1.25rem, 4vw, 1.875rem);
+        }
+        
+        .text-responsive-2xl {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+        }
+        
+        .text-responsive-xl {
+            font-size: clamp(0.875rem, 2.5vw, 1.25rem);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .nav-controls {
+                bottom: 0.5rem;
+                right: 0.5rem;
+                gap: 0.25rem;
+            }
+            
+            .nav-controls button {
+                padding: 0.5rem;
+            }
+            
+            .nav-controls svg {
+                width: 1rem;
+                height: 1rem;
+            }
+            
+            .slide-counter {
+                bottom: 0.5rem;
+                left: 0.5rem;
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .progress-bar {
+                height: 3px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .slide {
+                padding-top: 3rem;
+                padding-bottom: 3rem;
+            }
+        }
+        
+        /* Landscape mobile fix */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .slide {
+                padding-top: 1rem;
+                padding-bottom: 3rem;
+            }
         }
     </style>
 </head>
@@ -71,37 +186,37 @@
     </div>
 
     <!-- Navigation Controls -->
-    <div class="fixed bottom-8 right-8 z-50 flex gap-4">
-        <button onclick="prevSlide()" class="bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-full shadow-lg transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="nav-controls">
+        <button onclick="prevSlide()" class="bg-white hover:bg-gray-50 text-gray-800 transition">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
         </button>
-        <button onclick="nextSlide()" class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="nextSlide()" class="bg-green-500 hover:bg-green-600 text-white transition">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </button>
     </div>
 
     <!-- Slide Counter -->
-    <div class="fixed bottom-8 left-8 z-50 bg-white px-4 py-2 rounded-full shadow-lg text-sm text-gray-600">
+    <div class="slide-counter text-gray-600">
         <span id="currentSlide">1</span> / <span id="totalSlides">20</span>
     </div>
 
     <!-- Slide 1: Cover -->
     <div class="slide active" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-        <div class="container mx-auto px-8 flex flex-col justify-center items-center text-white">
-            <div class="fade-in text-center">
-                <div class="mb-8">
-                    <div class="w-32 h-32 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
-                        <span class="text-6xl">📱</span>
+        <div class="container mx-auto px-4 sm:px-8 flex flex-col justify-center items-center text-white">
+            <div class="fade-in text-center max-w-4xl">
+                <div class="mb-4 sm:mb-8">
+                    <div class="w-20 h-20 sm:w-32 sm:h-32 bg-white rounded-2xl sm:rounded-3xl mx-auto mb-4 sm:mb-6 flex items-center justify-center shadow-2xl">
+                        <span class="text-4xl sm:text-6xl">📱</span>
                     </div>
                 </div>
-                <h1 class="text-6xl font-bold mb-6">Evaluasi UX Tokopedia</h1>
-                <h1 class="text-6xl font-bold mb-6">Kelompok 6</h1>
-                <p class="text-2xl mb-4 opacity-90">Analisis Komprehensif Usability & User Experience</p>
-                <div class="mt-12 text-lg opacity-80">
+                <h1 class="text-responsive-6xl font-bold mb-3 sm:mb-6">Evaluasi UX Tokopedia</h1>
+                <h1 class="text-responsive-6xl font-bold mb-3 sm:mb-6">Kelompok 6</h1>
+                <p class="text-responsive-2xl mb-3 sm:mb-4 opacity-90">Analisis Komprehensif Usability & User Experience</p>
+                <div class="mt-6 sm:mt-12 text-responsive-xl opacity-80">
                     <p>15 Usulan Perbaikan Berdasarkan 5 Kriteria Nielsen</p>
                 </div>
             </div>
@@ -110,64 +225,64 @@
 
     <!-- Slide 2: Agenda & Team -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <div class="mb-12">
-                <h2 class="text-5xl font-bold text-gray-800 mb-6">Agenda Presentasi</h2>
-                <div class="grid grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition">
-                        <div class="text-3xl mb-3">🎯</div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">1. Identifikasi Interface</h3>
-                        <p class="text-sm text-gray-600">GUI vs Web UI</p>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center py-8">
+            <div class="mb-6 sm:mb-12">
+                <h2 class="text-responsive-5xl font-bold text-gray-800 mb-4 sm:mb-6">Agenda Presentasi</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition">
+                        <div class="text-2xl sm:text-3xl mb-2 sm:mb-3">🎯</div>
+                        <h3 class="text-sm sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">1. Identifikasi Interface</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">GUI vs Web UI</p>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition">
-                        <div class="text-3xl mb-3">📊</div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">2. Evaluasi Usability</h3>
-                        <p class="text-sm text-gray-600">5 Kriteria Nielsen</p>
+                    <div class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition">
+                        <div class="text-2xl sm:text-3xl mb-2 sm:mb-3">📊</div>
+                        <h3 class="text-sm sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">2. Evaluasi Usability</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">5 Kriteria Nielsen</p>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition">
-                        <div class="text-3xl mb-3">🔄</div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">3. Interaction Style</h3>
-                        <p class="text-sm text-gray-600">6 Style Analysis</p>
+                    <div class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition">
+                        <div class="text-2xl sm:text-3xl mb-2 sm:mb-3">🔄</div>
+                        <h3 class="text-sm sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">3. Interaction Style</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">6 Style Analysis</p>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition">
-                        <div class="text-3xl mb-3">💡</div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">4. Usulan Perbaikan</h3>
-                        <p class="text-sm text-gray-600">15 Solusi Spesifik</p>
+                    <div class="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition">
+                        <div class="text-2xl sm:text-3xl mb-2 sm:mb-3">💡</div>
+                        <h3 class="text-sm sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">4. Usulan Perbaikan</h3>
+                        <p class="text-xs sm:text-sm text-gray-600">15 Solusi Spesifik</p>
                     </div>
                 </div>
             </div>
 
             <!-- Team Members Section -->
-            <div class="mt-8">
-                <h2 class="text-4xl font-bold text-gray-800 mb-8 text-center">Tim Evaluator</h2>
-                <div class="grid grid-cols-4 gap-6">
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl shadow-lg text-white text-center">
-                        <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <span class="text-3xl">👤</span>
+            <div class="mt-4 sm:mt-8">
+                <h2 class="text-responsive-4xl font-bold text-gray-800 mb-4 sm:mb-8 text-center">Tim Evaluator</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg text-white text-center">
+                        <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white rounded-full mx-auto mb-2 sm:mb-4 flex items-center justify-center">
+                            <span class="text-xl sm:text-3xl">👤</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">[Afdhal Fauzan]</h3>
-                        <p class="text-sm opacity-90">[TI923049]</p>
+                        <h3 class="text-sm sm:text-xl font-bold mb-1">Afdhal Fauzan</h3>
+                        <p class="text-xs sm:text-sm opacity-90">TI923049</p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white text-center">
-                        <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <span class="text-3xl">👤</span>
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg text-white text-center">
+                        <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white rounded-full mx-auto mb-2 sm:mb-4 flex items-center justify-center">
+                            <span class="text-xl sm:text-3xl">👤</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">[Rahardian Wisnu Ardi]</h3>
-                        <p class="text-sm opacity-90">[TI923005]</p>
+                        <h3 class="text-sm sm:text-xl font-bold mb-1">Rahardian Wisnu Ardi</h3>
+                        <p class="text-xs sm:text-sm opacity-90">TI923005</p>
                     </div>
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-2xl shadow-lg text-white text-center">
-                        <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <span class="text-3xl">👤</span>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg text-white text-center">
+                        <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white rounded-full mx-auto mb-2 sm:mb-4 flex items-center justify-center">
+                            <span class="text-xl sm:text-3xl">👤</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">[Roihatul Janah]</h3>
-                        <p class="text-sm opacity-90">[TI923018]</p>
+                        <h3 class="text-sm sm:text-xl font-bold mb-1">Roihatul Janah</h3>
+                        <p class="text-xs sm:text-sm opacity-90">TI923018</p>
                     </div>
-                    <div class="bg-gradient-to-br from-pink-500 to-pink-600 p-6 rounded-2xl shadow-lg text-white text-center">
-                        <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <span class="text-3xl">👤</span>
+                    <div class="bg-gradient-to-br from-pink-500 to-pink-600 p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg text-white text-center">
+                        <div class="w-12 h-12 sm:w-20 sm:h-20 bg-white rounded-full mx-auto mb-2 sm:mb-4 flex items-center justify-center">
+                            <span class="text-xl sm:text-3xl">👤</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">[Durrohhati Fauziyyah]</h3>
-                        <p class="text-sm opacity-90">[TI923024]</p>
+                        <h3 class="text-sm sm:text-xl font-bold mb-1">Durrohhati Fauziyyah</h3>
+                        <p class="text-xs sm:text-sm opacity-90">TI923024</p>
                     </div>
                 </div>
             </div>
@@ -176,29 +291,29 @@
 
     <!-- Slide 3: Identifikasi Interface -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-12">Identifikasi Tipe Interface</h2>
-            <div class="bg-gradient-to-br from-green-50 to-green-100 p-12 rounded-3xl shadow-xl">
-                <div class="flex items-center gap-8 mb-8">
-                    <div class="text-7xl">📱</div>
-                    <div>
-                        <h3 class="text-4xl font-bold text-green-700 mb-2">GUI - Graphical User Interface</h3>
-                        <p class="text-xl text-gray-600">Native Mobile Application (Android & iOS)</p>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <h2 class="text-responsive-5xl font-bold text-gray-800 mb-6 sm:mb-12">Identifikasi Tipe Interface</h2>
+            <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 sm:p-12 rounded-2xl sm:rounded-3xl shadow-xl">
+                <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-6 sm:mb-8">
+                    <div class="text-5xl sm:text-7xl">📱</div>
+                    <div class="text-center sm:text-left">
+                        <h3 class="text-responsive-4xl font-bold text-green-700 mb-2">GUI - Graphical User Interface</h3>
+                        <p class="text-responsive-xl text-gray-600">Native Mobile Application (Android & iOS)</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-6 mt-8">
-                    <div class="bg-white p-6 rounded-xl">
-                        <h4 class="font-bold text-lg text-gray-800 mb-3">✅ Karakteristik</h4>
-                        <ul class="space-y-2 text-gray-600">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl">
+                        <h4 class="font-bold text-base sm:text-lg text-gray-800 mb-3">✅ Karakteristik</h4>
+                        <ul class="space-y-2 text-sm sm:text-base text-gray-600">
                             <li>• Touch gestures (swipe, pinch, tap)</li>
                             <li>• Rich UI dengan animasi</li>
                             <li>• Native components</li>
                             <li>• Hardware integration</li>
                         </ul>
                     </div>
-                    <div class="bg-white p-6 rounded-xl">
-                        <h4 class="font-bold text-lg text-gray-800 mb-3">🎯 Platform</h4>
-                        <ul class="space-y-2 text-gray-600">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl">
+                        <h4 class="font-bold text-base sm:text-lg text-gray-800 mb-3">🎯 Platform</h4>
+                        <ul class="space-y-2 text-sm sm:text-base text-gray-600">
                             <li>• Android (Play Store)</li>
                             <li>• iOS (App Store)</li>
                             <li>• Web version tersedia</li>
@@ -212,62 +327,62 @@
 
     <!-- Slide 4: Overall Score -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-12 text-center">Overall UX Score</h2>
-            <div class="flex justify-center items-center gap-16">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <h2 class="text-responsive-5xl font-bold text-gray-800 mb-6 sm:mb-12 text-center">Overall UX Score</h2>
+            <div class="flex flex-col lg:flex-row justify-center items-center gap-8 lg:gap-16">
                 <div class="text-center">
-                    <div class="score-circle mx-auto mb-6">
-                        <svg width="120" height="120">
+                    <div class="score-circle mx-auto mb-4 sm:mb-6">
+                        <svg viewBox="0 0 120 120">
                             <circle class="bg-circle" cx="60" cy="60" r="54"/>
                             <circle class="progress-circle" cx="60" cy="60" r="54" style="stroke-dashoffset: 169.646"/>
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-4xl font-bold text-gray-800">5.2</span>
+                            <span class="text-responsive-4xl font-bold text-gray-800">5.2</span>
                         </div>
                     </div>
-                    <p class="text-2xl font-semibold text-gray-700">dari 10</p>
+                    <p class="text-responsive-2xl font-semibold text-gray-700">dari 10</p>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-white p-4 rounded-xl shadow-lg w-96">
+                <div class="space-y-3 sm:space-y-4 w-full max-w-md">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-lg">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Learnability</span>
-                            <span class="text-green-600 font-bold">6.0</span>
+                            <span class="font-semibold text-sm sm:text-base text-gray-700">Learnability</span>
+                            <span class="text-green-600 font-bold text-sm sm:text-base">6.0</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="bg-green-500 h-2 rounded-full" style="width: 60%"></div>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-lg w-96">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-lg">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Efficiency</span>
-                            <span class="text-yellow-600 font-bold">5.0</span>
+                            <span class="font-semibold text-sm sm:text-base text-gray-700">Efficiency</span>
+                            <span class="text-yellow-600 font-bold text-sm sm:text-base">5.0</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="bg-yellow-500 h-2 rounded-full" style="width: 50%"></div>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-lg w-96">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-lg">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Memorability</span>
-                            <span class="text-red-600 font-bold">4.0</span>
+                            <span class="font-semibold text-sm sm:text-base text-gray-700">Memorability</span>
+                            <span class="text-red-600 font-bold text-sm sm:text-base">4.0</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="bg-red-500 h-2 rounded-full" style="width: 40%"></div>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-lg w-96">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-lg">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Error Tolerance</span>
-                            <span class="text-yellow-600 font-bold">5.0</span>
+                            <span class="font-semibold text-sm sm:text-base text-gray-700">Error Tolerance</span>
+                            <span class="text-yellow-600 font-bold text-sm sm:text-base">5.0</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="bg-yellow-500 h-2 rounded-full" style="width: 50%"></div>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-lg w-96">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-lg">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Satisfaction</span>
-                            <span class="text-green-600 font-bold">6.0</span>
+                            <span class="font-semibold text-sm sm:text-base text-gray-700">Satisfaction</span>
+                            <span class="text-green-600 font-bold text-sm sm:text-base">6.0</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="bg-green-500 h-2 rounded-full" style="width: 60%"></div>
@@ -280,52 +395,52 @@
 
     <!-- Slide 5: Learnability Overview -->
     <div class="slide" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
-        <div class="container mx-auto px-16 flex flex-col justify-center text-white">
-            <div class="text-center mb-12">
-                <div class="text-7xl mb-6">📚</div>
-                <h2 class="text-6xl font-bold mb-6">LEARNABILITY</h2>
-                <p class="text-3xl opacity-90">Kemudahan Belajar</p>
-                <div class="mt-8">
-                    <span class="text-5xl font-bold">Skor: 6/10</span>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center text-white">
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="text-5xl sm:text-7xl mb-4 sm:mb-6">📚</div>
+                <h2 class="text-responsive-6xl font-bold mb-4 sm:mb-6">LEARNABILITY</h2>
+                <p class="text-responsive-3xl opacity-90">Kemudahan Belajar</p>
+                <div class="mt-6 sm:mt-8">
+                    <span class="text-responsive-5xl font-bold">Skor: 6/10</span>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-6 mt-8">
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">❌ Masalah</h3>
-                    <p class="text-sm">Entry point terlalu banyak, fitur tersembunyi, hierarchy tidak jelas</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">❌ Masalah</h3>
+                    <p class="text-xs sm:text-sm">Entry point terlalu banyak, fitur tersembunyi, hierarchy tidak jelas</p>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">💡 Solusi</h3>
-                    <p class="text-sm">3 perbaikan: Onboarding, Navigation, Visual Hierarchy</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">💡 Solusi</h3>
+                    <p class="text-xs sm:text-sm">3 perbaikan: Onboarding, Navigation, Visual Hierarchy</p>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">📈 Target</h3>
-                    <p class="text-sm">Time-to-first-purchase: 15 min → 5 min</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">📈 Target</h3>
+                    <p class="text-xs sm:text-sm">Time-to-first-purchase: 15 min → 5 min</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 6-8: Learnability Solutions -->
+    <!-- Slide 6: Learnability Solution 1 -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold">1</div>
-                <h2 class="text-4xl font-bold text-gray-800">Interactive Onboarding</h2>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-blue-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">1</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Interactive Onboarding</h2>
             </div>
-            <div class="grid grid-cols-2 gap-8">
-                <div class="bg-red-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-red-700 mb-4">❌ Masalah</h3>
-                    <p class="text-gray-700 mb-4">User baru kesulitan memahami fitur dasar dan perbedaan badge seller</p>
-                    <ul class="space-y-2 text-gray-600">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">❌ Masalah</h3>
+                    <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">User baru kesulitan memahami fitur dasar dan perbedaan badge seller</p>
+                    <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
                         <li>• Tidak ada guidance untuk fitur baru</li>
                         <li>• Istilah teknis membingungkan</li>
                         <li>• Tutorial tidak contextual</li>
                     </ul>
                 </div>
-                <div class="bg-green-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-green-700 mb-4">✅ Solusi</h3>
-                    <ul class="space-y-3 text-gray-700">
+                <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Solusi</h3>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
                         <li><strong>Progressive Onboarding:</strong> Tutorial 5 langkah dengan spotlight</li>
                         <li><strong>Contextual Tooltips:</strong> Penjelasan saat encounter fitur baru</li>
                         <li><strong>Interactive Glossary:</strong> Tap-to-explain istilah teknis</li>
@@ -333,32 +448,33 @@
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 bg-blue-50 p-6 rounded-xl">
-                <h4 class="font-bold text-gray-800 mb-2">📊 Expected Impact:</h4>
-                <p class="text-gray-700">Time-to-first-purchase: 15 min → 5 min | Onboarding completion: 30% → 70%</p>
+            <div class="mt-6 sm:mt-8 bg-blue-50 p-4 sm:p-6 rounded-xl">
+                <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                <p class="text-xs sm:text-sm text-gray-700">Time-to-first-purchase: 15 min → 5 min | Onboarding completion: 30% → 70%</p>
             </div>
         </div>
     </div>
 
+    <!-- Slide 7: Learnability Solution 2 -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold">2</div>
-                <h2 class="text-4xl font-bold text-gray-800">Unified Navigation</h2>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-blue-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">2</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Unified Navigation</h2>
             </div>
-            <div class="grid grid-cols-2 gap-8">
-                <div class="bg-red-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-red-700 mb-4">❌ Masalah</h3>
-                    <p class="text-gray-700 mb-4">Terlalu banyak entry point untuk fitur yang sama</p>
-                    <ul class="space-y-2 text-gray-600">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">❌ Masalah</h3>
+                    <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">Terlalu banyak entry point untuk fitur yang sama</p>
+                    <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
                         <li>• Beli pulsa dari 5 tempat berbeda</li>
                         <li>• Menu "Lainnya" 30+ items tanpa struktur</li>
                         <li>• User bingung mau akses dari mana</li>
                     </ul>
                 </div>
-                <div class="bg-green-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-green-700 mb-4">✅ Solusi</h3>
-                    <ul class="space-y-3 text-gray-700">
+                <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Solusi</h3>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
                         <li><strong>Single Entry Point:</strong> 1 primary access per feature</li>
                         <li><strong>Mega Menu Redesign:</strong> Kategorisasi jelas (Belanja, Layanan, Keuangan)</li>
                         <li><strong>Search Enhancement:</strong> Suggest produk + fitur shortcuts</li>
@@ -366,32 +482,33 @@
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 bg-blue-50 p-6 rounded-xl">
-                <h4 class="font-bold text-gray-800 mb-2">📊 Expected Impact:</h4>
-                <p class="text-gray-700">Navigation confusion: 45% → 15% | Feature discovery rate: +40%</p>
+            <div class="mt-6 sm:mt-8 bg-blue-50 p-4 sm:p-6 rounded-xl">
+                <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                <p class="text-xs sm:text-sm text-gray-700">Navigation confusion: 45% → 15% | Feature discovery rate: +40%</p>
             </div>
         </div>
     </div>
 
+    <!-- Slide 8: Learnability Solution 3 -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold">3</div>
-                <h2 class="text-4xl font-bold text-gray-800">Visual Hierarchy & Consistency</h2>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-blue-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">3</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Visual Hierarchy & Consistency</h2>
             </div>
-            <div class="grid grid-cols-2 gap-8">
-                <div class="bg-red-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-red-700 mb-4">❌ Masalah</h3>
-                    <p class="text-gray-700 mb-4">Semua elemen compete for attention</p>
-                    <ul class="space-y-2 text-gray-600">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">❌ Masalah</h3>
+                    <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">Semua elemen compete for attention</p>
+                    <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
                         <li>• User bingung mana yang penting</li>
                         <li>• Terlalu banyak badges per produk</li>
                         <li>• Inconsistent button placement</li>
                     </ul>
                 </div>
-                <div class="bg-green-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-green-700 mb-4">✅ Solusi</h3>
-                    <ul class="space-y-3 text-gray-700">
+                <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Solusi</h3>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
                         <li><strong>Visual Priority:</strong> Primary (solid), Secondary (outline), Tertiary (text)</li>
                         <li><strong>Badge Hierarchy:</strong> Max 2 badges visible, rest "+2 more"</li>
                         <li><strong>Color Coding:</strong> Green (action), Red (promo), Blue (info)</li>
@@ -399,320 +516,495 @@
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 bg-blue-50 p-6 rounded-xl">
-                <h4 class="font-bold text-gray-800 mb-2">📊 Expected Impact:</h4>
-                <p class="text-gray-700">Task success rate: 60% → 85% | Time to understand product: 30s → 10s</p>
+            <div class="mt-6 sm:mt-8 bg-blue-50 p-4 sm:p-6 rounded-xl">
+                <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                <p class="text-xs sm:text-sm text-gray-700">Task success rate: 60% → 85% | Time to understand product: 30s → 10s</p>
             </div>
         </div>
     </div>
 
     <!-- Slide 9: Efficiency Overview -->
     <div class="slide" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-        <div class="container mx-auto px-16 flex flex-col justify-center text-white">
-            <div class="text-center mb-12">
-                <div class="text-7xl mb-6">⚡</div>
-                <h2 class="text-6xl font-bold mb-6">EFFICIENCY</h2>
-                <p class="text-3xl opacity-90">Efisiensi Penggunaan</p>
-                <div class="mt-8">
-                    <span class="text-5xl font-bold">Skor: 5/10</span>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center text-white">
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="text-5xl sm:text-7xl mb-4 sm:mb-6">⚡</div>
+                <h2 class="text-responsive-6xl font-bold mb-4 sm:mb-6">EFFICIENCY</h2>
+                <p class="text-responsive-3xl opacity-90">Efisiensi Penggunaan</p>
+                <div class="mt-6 sm:mt-8">
+                    <span class="text-responsive-5xl font-bold">Skor: 5/10</span>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-6 mt-8">
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">❌ Masalah</h3>
-                    <p class="text-sm">Checkout 9-10 langkah, pop-up mengganggu, bulk operations tidak ada</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">❌ Masalah</h3>
+                    <p class="text-xs sm:text-sm">Checkout 9-10 langkah, pop-up mengganggu, bulk operations tidak ada</p>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">💡 Solusi</h3>
-                    <p class="text-sm">Express checkout, minimize interruptions, bulk operations</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">💡 Solusi</h3>
+                    <p class="text-xs sm:text-sm">Express checkout, minimize interruptions, bulk operations</p>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">📈 Target</h3>
-                    <p class="text-sm">Checkout time: 180s → 45s | Conversion: +25%</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">📈 Target</h3>
+                    <p class="text-xs sm:text-sm">Checkout time: 180s → 45s | Conversion: +25%</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 10-12: Efficiency Solutions (abbreviated for space) -->
+    <!-- Slide 10: Efficiency Solution 1 -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <div class="flex items-center gap-4 mb-8">
-                <div class="bg-orange-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold">4</div>
-                <h2 class="text-4xl font-bold text-gray-800">Express Checkout</h2>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-orange-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">4</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Express Checkout</h2>
             </div>
-            <div class="grid grid-cols-2 gap-8">
-                <div class="bg-red-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-red-700 mb-4">❌ Masalah</h3>
-                    <p class="text-gray-700 mb-4">Checkout memerlukan 9-10 langkah dengan banyak screen transitions</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">❌ Masalah</h3>
+                    <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">Checkout memerlukan 9-10 langkah dengan banyak screen transitions</p>
+                    <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
+                        <li>• Review cart → pilih alamat → pilih courier</li>
+                        <li>• Pilih payment → konfirmasi → OTP</li>
+                        <li>• Setiap langkah = full page load</li>
+                    </ul>
                 </div>
-                <div class="bg-green-50 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-green-700 mb-4">✅ Solusi</h3>
-                    <ul class="space-y-3 text-gray-700">
+                <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Solusi</h3>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
                         <li><strong>One-Page Checkout:</strong> Semua sections dalam 1 halaman</li>
                         <li><strong>1-Tap Express:</strong> Default settings + biometric confirm</li>
                         <li><strong>Smart Defaults:</strong> AI predict courier preference</li>
+                        <li><strong>Progressive Disclosure:</strong> Show advanced options only when needed</li>
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 bg-orange-50 p-6 rounded-xl">
-                <h4 class="font-bold text-gray-800 mb-2">📊 Expected Impact:</h4>
-                <p class="text-gray-700">Checkout time: 180s → 45s | Conversion rate: +25% | Cart abandonment: 70% → 45%</p>
+            <div class="mt-6 sm:mt-8 bg-orange-50 p-4 sm:p-6 rounded-xl">
+                <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                <p class="text-xs sm:text-sm text-gray-700">Checkout time: 180s → 45s | Conversion rate: +25% | Cart abandonment: 70% → 45%</p>
             </div>
         </div>
     </div>
 
-    <!-- Continue with remaining slides following same pattern... -->
+    <!-- Slide 11: Efficiency Solution 2 -->
+    <div class="slide">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-orange-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">5</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Minimize Interruptions</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">❌ Masalah</h3>
+                    <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">Pop-ups mengganggu flow pengguna</p>
+                    <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
+                        <li>• Rating pop-up setelah setiap order</li>
+                        <li>• Banner promo menutupi konten</li>
+                        <li>• Full-screen ads saat browsing</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Solusi</h3>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
+                        <li><strong>Contextual Timing:</strong> Rating request after 3rd delivery</li>
+                        <li><strong>Dismissible Banners:</strong> Easy close button</li>
+                        <li><strong>Native Ads:</strong> Inline product placement</li>
+                        <li><strong>Smart Frequency:</strong> Max 1 pop-up per session</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-6 sm:mt-8 bg-orange-50 p-4 sm:p-6 rounded-xl">
+                <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                <p class="text-xs sm:text-sm text-gray-700">User frustration: -60% | Session duration: +35% | Engagement: +28%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Efficiency Solution 3 -->
+    <div class="slide">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-orange-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">6</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Bulk Operations</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">❌ Masalah</h3>
+                    <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4">Harus action satu per satu</p>
+                    <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
+                        <li>• Hapus wishlist 1 by 1</li>
+                        <li>• Add to cart repeated action</li>
+                        <li>• Tidak bisa bulk review</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Solusi</h3>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
+                        <li><strong>Multi-Select:</strong> Checkbox untuk bulk actions</li>
+                        <li><strong>Quick Actions:</strong> Swipe gestures untuk common tasks</li>
+                        <li><strong>Batch Processing:</strong> Move all, delete all options</li>
+                        <li><strong>Smart Suggestions:</strong> "Add similar items to cart"</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-6 sm:mt-8 bg-orange-50 p-4 sm:p-6 rounded-xl">
+                <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                <p class="text-xs sm:text-sm text-gray-700">Task completion time: -50% | Power user satisfaction: +45%</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Slide 13: Memorability Overview -->
     <div class="slide" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
-        <div class="container mx-auto px-16 flex flex-col justify-center text-white">
-            <div class="text-center mb-12">
-                <div class="text-7xl mb-6">🧠</div>
-                <h2 class="text-6xl font-bold mb-6">MEMORABILITY</h2>
-                <p class="text-3xl opacity-90">Kemudahan Mengingat</p>
-                <div class="mt-8">
-                    <span class="text-5xl font-bold">Skor: 4/10</span>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center text-white">
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="text-5xl sm:text-7xl mb-4 sm:mb-6">🧠</div>
+                <h2 class="text-responsive-6xl font-bold mb-4 sm:mb-6">MEMORABILITY</h2>
+                <p class="text-responsive-3xl opacity-90">Kemudahan Mengingat</p>
+                <div class="mt-6 sm:mt-8">
+                    <span class="text-responsive-5xl font-bold">Skor: 4/10</span>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-6 mt-8">
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">❌ Masalah</h3>
-                    <p class="text-sm">Layout berubah-ubah, lokasi fitur tidak konsisten setiap update</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">❌ Masalah</h3>
+                    <p class="text-xs sm:text-sm">Layout berubah-ubah, lokasi fitur tidak konsisten setiap update</p>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">💡 Solusi</h3>
-                    <p class="text-sm">Persistent navigation, layout consistency, design system</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">💡 Solusi</h3>
+                    <p class="text-xs sm:text-sm">Persistent navigation, layout consistency, design system</p>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">📈 Target</h3>
-                    <p class="text-sm">Navigation errors: 50% → 10% | Re-learning time → 0</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 14: Error Tolerance Overview -->
-    <div class="slide" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-        <div class="container mx-auto px-16 flex flex-col justify-center text-white">
-            <div class="text-center mb-12">
-                <div class="text-7xl mb-6">🛡️</div>
-                <h2 class="text-6xl font-bold mb-6">ERROR TOLERANCE</h2>
-                <p class="text-3xl opacity-90">Toleransi Kesalahan</p>
-                <div class="mt-8">
-                    <span class="text-5xl font-bold">Skor: 5/10</span>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-6 mt-8">
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">❌ Masalah</h3>
-                    <p class="text-sm">Tidak bisa edit order, session timeout, data loss saat crash</p>
-                </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">💡 Solusi</h3>
-                    <p class="text-sm">Undo system, auto-save, proactive error prevention</p>
-                </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">📈 Target</h3>
-                    <p class="text-sm">Data loss: 30% → 2% | Error recovery: >90%</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">📈 Target</h3>
+                    <p class="text-xs sm:text-sm">Navigation errors: 50% → 10% | Re-learning time → 0</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 15: Satisfaction Overview -->
-    <div class="slide" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
-        <div class="container mx-auto px-16 flex flex-col justify-center text-white">
-            <div class="text-center mb-12">
-                <div class="text-7xl mb-6">😊</div>
-                <h2 class="text-6xl font-bold mb-6">SATISFACTION</h2>
-                <p class="text-3xl opacity-90">Kepuasan Pengguna</p>
-                <div class="mt-8">
-                    <span class="text-5xl font-bold">Skor: 6/10</span>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-6 mt-8">
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">❌ Masalah</h3>
-                    <p class="text-sm">Notification spam, UI ramai, forced rating, loading lambat</p>
-                </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">💡 Solusi</h3>
-                    <p class="text-sm">Smart notifications, clean design, performance optimization</p>
-                </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-3">📈 Target</h3>
-                    <p class="text-sm">NPS: 45 → 65+ | App rating: 4.3 → 4.7+ stars</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 16: Interaction Styles -->
+    <!-- Slide 14: Memorability Solutions -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-12">Interaction Styles Analysis</h2>
-            <div class="grid grid-cols-3 gap-6">
-                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-8 rounded-2xl shadow-xl">
-                    <h3 class="text-3xl font-bold mb-3">60%</h3>
-                    <h4 class="text-xl font-bold mb-2">Direct Manipulation</h4>
-                    <p class="text-sm opacity-90">Touch gestures, drag & drop, visual feedback</p>
-                </div>
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-8 rounded-2xl shadow-xl">
-                    <h3 class="text-3xl font-bold mb-3">25%</h3>
-                    <h4 class="text-xl font-bold mb-2">Menu Selection</h4>
-                    <p class="text-sm opacity-90">Bottom nav, hamburger menu, dropdowns</p>
-                </div>
-                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-8 rounded-2xl shadow-xl">
-                    <h3 class="text-3xl font-bold mb-3">10%</h3>
-                    <h4 class="text-xl font-bold mb-2">Form Fill-in</h4>
-                    <p class="text-sm opacity-90">Search, filters, checkout forms</p>
-                </div>
-                <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-8 rounded-2xl shadow-xl">
-                    <h3 class="text-3xl font-bold mb-3">3%</h3>
-                    <h4 class="text-xl font-bold mb-2">Command Language</h4>
-                    <p class="text-sm opacity-90">Voice search, deep linking, barcode</p>
-                </div>
-                <div class="bg-gradient-to-br from-pink-500 to-pink-600 text-white p-8 rounded-2xl shadow-xl">
-                    <h3 class="text-3xl font-bold mb-3">2%</h3>
-                    <h4 class="text-xl font-bold mb-2">Natural Language</h4>
-                    <p class="text-sm opacity-90">Chatbot, smart search, voice commerce</p>
-                </div>
-                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-8 rounded-2xl shadow-xl">
-                    <h3 class="text-3xl font-bold mb-3">&lt;1%</h3>
-                    <h4 class="text-xl font-bold mb-2">AR/VR</h4>
-                    <p class="text-sm opacity-90">AR try-on, 360° product view</p>
-                </div>
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-purple-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">7-9</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Consistency & Layout</h2>
             </div>
-        </div>
-    </div>
-
-    <!-- Slide 17: Implementation Priority -->
-    <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-12">Prioritas Implementasi</h2>
-            <div class="space-y-6">
-                <div class="bg-red-50 border-l-8 border-red-500 p-8 rounded-r-2xl shadow-lg">
-                    <div class="flex items-center gap-4 mb-4">
-                        <span class="bg-red-500 text-white px-4 py-2 rounded-full font-bold">HIGH</span>
-                        <h3 class="text-2xl font-bold text-gray-800">0-3 Bulan - Quick Wins</h3>
+            <div class="space-y-4 sm:space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3">❌ Masalah</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
+                            <li>• Bottom nav items berubah posisi</li>
+                            <li>• Homepage layout shuffle setiap update</li>
+                            <li>• Fitur pindah ke menu berbeda</li>
+                        </ul>
                     </div>
-                    <ul class="grid grid-cols-2 gap-4 text-gray-700">
+                    <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3">✅ Solusi</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-700">
+                            <li><strong>Persistent Nav:</strong> Fixed bottom menu structure</li>
+                            <li><strong>Consistent Layout:</strong> Core sections stay same</li>
+                            <li><strong>Design System:</strong> Standardized components</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-purple-50 p-4 sm:p-6 rounded-xl">
+                    <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                    <p class="text-xs sm:text-sm text-gray-700">Navigation errors: 50% → 10% | Feature re-discovery: &lt;30s | Task success: +40%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 15: Error Tolerance Overview -->
+    <div class="slide" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center text-white">
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="text-5xl sm:text-7xl mb-4 sm:mb-6">🛡️</div>
+                <h2 class="text-responsive-6xl font-bold mb-4 sm:mb-6">ERROR TOLERANCE</h2>
+                <p class="text-responsive-3xl opacity-90">Toleransi Kesalahan</p>
+                <div class="mt-6 sm:mt-8">
+                    <span class="text-responsive-5xl font-bold">Skor: 5/10</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">❌ Masalah</h3>
+                    <p class="text-xs sm:text-sm">Tidak bisa edit order, session timeout, data loss saat crash</p>
+                </div>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">💡 Solusi</h3>
+                    <p class="text-xs sm:text-sm">Undo system, auto-save, proactive error prevention</p>
+                </div>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">📈 Target</h3>
+                    <p class="text-xs sm:text-sm">Data loss: 30% → 2% | Error recovery: &gt;90%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 16: Error Tolerance Solutions -->
+    <div class="slide">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-red-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">10-12</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">Error Prevention & Recovery</h2>
+            </div>
+            <div class="space-y-4 sm:space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3">❌ Masalah</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
+                            <li>• Tidak bisa edit alamat setelah checkout</li>
+                            <li>• Form data hilang saat back button</li>
+                            <li>• Session timeout tanpa warning</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3">✅ Solusi</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-700">
+                            <li><strong>Undo Function:</strong> Edit order dalam 5 menit</li>
+                            <li><strong>Auto-Save:</strong> Form data preserved</li>
+                            <li><strong>Proactive Warning:</strong> Confirm before critical actions</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-red-50 p-4 sm:p-6 rounded-xl">
+                    <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                    <p class="text-xs sm:text-sm text-gray-700">Data loss: 30% → 2% | Error recovery: &gt;90% | Support tickets: -40%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 17: Satisfaction Overview -->
+    <div class="slide" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center text-white">
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="text-5xl sm:text-7xl mb-4 sm:mb-6">😊</div>
+                <h2 class="text-responsive-6xl font-bold mb-4 sm:mb-6">SATISFACTION</h2>
+                <p class="text-responsive-3xl opacity-90">Kepuasan Pengguna</p>
+                <div class="mt-6 sm:mt-8">
+                    <span class="text-responsive-5xl font-bold">Skor: 6/10</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">❌ Masalah</h3>
+                    <p class="text-xs sm:text-sm">Notification spam, UI ramai, forced rating, loading lambat</p>
+                </div>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">💡 Solusi</h3>
+                    <p class="text-xs sm:text-sm">Smart notifications, clean design, performance optimization</p>
+                </div>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-3">📈 Target</h3>
+                    <p class="text-xs sm:text-sm">NPS: 45 → 65+ | App rating: 4.3 → 4.7+ stars</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 18: Satisfaction Solutions -->
+    <div class="slide">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div class="bg-pink-500 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold">13-15</div>
+                <h2 class="text-responsive-4xl font-bold text-gray-800">User Satisfaction</h2>
+            </div>
+            <div class="space-y-4 sm:space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="bg-red-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3">❌ Masalah</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-600">
+                            <li>• 10+ notifikasi per hari</li>
+                            <li>• UI terlalu ramai</li>
+                            <li>• Loading time 5-8 detik</li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3">✅ Solusi</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-700">
+                            <li><strong>Smart Notifications:</strong> AI-based timing & relevance</li>
+                            <li><strong>Clean Design:</strong> Reduce visual clutter</li>
+                            <li><strong>Performance:</strong> Load time &lt;2s with optimization</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-pink-50 p-4 sm:p-6 rounded-xl">
+                    <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📊 Expected Impact:</h4>
+                    <p class="text-xs sm:text-sm text-gray-700">NPS: 45 → 65+ | CSAT: 7.5 → 9/10 | App rating: 4.3 → 4.7+ stars</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 19: Interaction Styles -->
+    <div class="slide">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center">
+            <h2 class="text-responsive-5xl font-bold text-gray-800 mb-6 sm:mb-12">Interaction Styles Analysis</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-xl">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">60%</h3>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Direct Manipulation</h4>
+                    <p class="text-xs sm:text-sm opacity-90">Touch gestures, drag & drop, visual feedback</p>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-xl">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">25%</h3>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Menu Selection</h4>
+                    <p class="text-xs sm:text-sm opacity-90">Bottom nav, hamburger menu, dropdowns</p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-xl">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">10%</h3>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Form Fill-in</h4>
+                    <p class="text-xs sm:text-sm opacity-90">Search, filters, checkout forms</p>
+                </div>
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-xl">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">3%</h3>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Command Language</h4>
+                    <p class="text-xs sm:text-sm opacity-90">Voice search, deep linking, barcode</p>
+                </div>
+                <div class="bg-gradient-to-br from-pink-500 to-pink-600 text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-xl">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">2%</h3>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">Natural Language</h4>
+                    <p class="text-xs sm:text-sm opacity-90">Chatbot, smart search, voice commerce</p>
+                </div>
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-xl">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">&lt;1%</h3>
+                    <h4 class="text-lg sm:text-xl font-bold mb-2">AR/VR</h4>
+                    <p class="text-xs sm:text-sm opacity-90">AR try-on, 360° product view</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 20: Implementation Priority -->
+    <div class="slide">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center py-8">
+            <h2 class="text-responsive-5xl font-bold text-gray-800 mb-6 sm:mb-12">Prioritas Implementasi</h2>
+            <div class="space-y-4 sm:space-y-6">
+                <div class="bg-red-50 border-l-4 sm:border-l-8 border-red-500 p-4 sm:p-8 rounded-r-xl sm:rounded-r-2xl shadow-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                        <span class="bg-red-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-xs sm:text-base">HIGH</span>
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">0-3 Bulan - Quick Wins</h3>
+                    </div>
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-700">
                         <li>✅ Express Checkout & One-Page Flow</li>
                         <li>✅ Intelligent Notification System</li>
                         <li>✅ Undo/Edit Functionality</li>
                         <li>✅ Minimize Interruptions</li>
                     </ul>
-                    <p class="mt-4 text-sm text-gray-600"><strong>Impact:</strong> Conversion +25%, Satisfaction +30%, Abandonment -40%</p>
+                    <p class="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600"><strong>Impact:</strong> Conversion +25%, Satisfaction +30%, Abandonment -40%</p>
                 </div>
                 
-                <div class="bg-yellow-50 border-l-8 border-yellow-500 p-8 rounded-r-2xl shadow-lg">
-                    <div class="flex items-center gap-4 mb-4">
-                        <span class="bg-yellow-500 text-white px-4 py-2 rounded-full font-bold">MEDIUM</span>
-                        <h3 class="text-2xl font-bold text-gray-800">3-6 Bulan - Foundation Building</h3>
+                <div class="bg-yellow-50 border-l-4 sm:border-l-8 border-yellow-500 p-4 sm:p-8 rounded-r-xl sm:rounded-r-2xl shadow-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                        <span class="bg-yellow-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-xs sm:text-base">MEDIUM</span>
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">3-6 Bulan - Foundation Building</h3>
                     </div>
-                    <ul class="grid grid-cols-2 gap-4 text-gray-700">
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-700">
                         <li>✅ Unified Navigation</li>
                         <li>✅ Consistent Layout & Design</li>
                         <li>✅ Smart Save & Recovery</li>
                         <li>✅ Clean Visual Design</li>
                     </ul>
-                    <p class="mt-4 text-sm text-gray-600"><strong>Impact:</strong> Task success +40%, Efficiency +50%, Visual comfort +60%</p>
+                    <p class="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600"><strong>Impact:</strong> Task success +40%, Efficiency +50%, Visual comfort +60%</p>
                 </div>
                 
-                <div class="bg-green-50 border-l-8 border-green-500 p-8 rounded-r-2xl shadow-lg">
-                    <div class="flex items-center gap-4 mb-4">
-                        <span class="bg-green-500 text-white px-4 py-2 rounded-full font-bold">LOW</span>
-                        <h3 class="text-2xl font-bold text-gray-800">6-12 Bulan - Refinement & Polish</h3>
+                <div class="bg-green-50 border-l-4 sm:border-l-8 border-green-500 p-4 sm:p-8 rounded-r-xl sm:rounded-r-2xl shadow-lg">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                        <span class="bg-green-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-xs sm:text-base">LOW</span>
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">6-12 Bulan - Refinement & Polish</h3>
                     </div>
-                    <ul class="grid grid-cols-2 gap-4 text-gray-700">
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-700">
                         <li>✅ Interactive Onboarding</li>
                         <li>✅ Visual Hierarchy</li>
                         <li>✅ Bulk Operations</li>
                         <li>✅ Proactive Error Prevention</li>
                         <li>✅ Performance Optimization</li>
                     </ul>
-                    <p class="mt-4 text-sm text-gray-600"><strong>Impact:</strong> New user retention +35%, Power user satisfaction +45%, NPS +20</p>
+                    <p class="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600"><strong>Impact:</strong> New user retention +35%, Power user satisfaction +45%, NPS +20</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 18: Key Metrics -->
+    <!-- Slide 21: Key Metrics -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-12">Key Success Metrics</h2>
-            <div class="grid grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
-                        <h3 class="font-bold text-gray-800 mb-2">📚 Learnability</h3>
-                        <ul class="text-sm text-gray-600 space-y-1">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center py-8">
+            <h2 class="text-responsive-5xl font-bold text-gray-800 mb-6 sm:mb-12">Key Success Metrics</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="space-y-3 sm:space-y-4">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                        <h3 class="font-bold text-sm sm:text-base text-gray-800 mb-2">📚 Learnability</h3>
+                        <ul class="text-xs sm:text-sm text-gray-600 space-y-1">
                             <li>• Time to first purchase: <strong>&lt;5 min</strong></li>
                             <li>• Feature discovery: <strong>80%</strong> in 1 week</li>
                             <li>• Onboarding completion: <strong>70%</strong></li>
                         </ul>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-orange-500">
-                        <h3 class="font-bold text-gray-800 mb-2">⚡ Efficiency</h3>
-                        <ul class="text-sm text-gray-600 space-y-1">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border-l-4 border-orange-500">
+                        <h3 class="font-bold text-sm sm:text-base text-gray-800 mb-2">⚡ Efficiency</h3>
+                        <ul class="text-xs sm:text-sm text-gray-600 space-y-1">
                             <li>• Checkout time: <strong>&lt;90 sec</strong></li>
                             <li>• Cart abandonment: <strong>&lt;45%</strong></li>
                             <li>• Search to purchase: <strong>&lt;3 min</strong></li>
                         </ul>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
-                        <h3 class="font-bold text-gray-800 mb-2">🧠 Memorability</h3>
-                        <ul class="text-sm text-gray-600 space-y-1">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
+                        <h3 class="font-bold text-sm sm:text-base text-gray-800 mb-2">🧠 Memorability</h3>
+                        <ul class="text-xs sm:text-sm text-gray-600 space-y-1">
                             <li>• Navigation errors: <strong>&lt;10%</strong></li>
                             <li>• Feature re-discovery: <strong>&lt;30 sec</strong></li>
                             <li>• Task success rate: <strong>&gt;80%</strong></li>
                         </ul>
                     </div>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500">
-                        <h3 class="font-bold text-gray-800 mb-2">🛡️ Error Tolerance</h3>
-                        <ul class="text-sm text-gray-600 space-y-1">
+                <div class="space-y-3 sm:space-y-4">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border-l-4 border-red-500">
+                        <h3 class="font-bold text-sm sm:text-base text-gray-800 mb-2">🛡️ Error Tolerance</h3>
+                        <ul class="text-xs sm:text-sm text-gray-600 space-y-1">
                             <li>• Error recovery: <strong>&gt;90%</strong></li>
                             <li>• Data loss: <strong>&lt;2%</strong></li>
                             <li>• Form failure: <strong>&lt;5%</strong></li>
                         </ul>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-pink-500">
-                        <h3 class="font-bold text-gray-800 mb-2">😊 Satisfaction</h3>
-                        <ul class="text-sm text-gray-600 space-y-1">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border-l-4 border-pink-500">
+                        <h3 class="font-bold text-sm sm:text-base text-gray-800 mb-2">😊 Satisfaction</h3>
+                        <ul class="text-xs sm:text-sm text-gray-600 space-y-1">
                             <li>• NPS score: <strong>&gt;65</strong></li>
                             <li>• CSAT: <strong>&gt;9/10</strong></li>
                             <li>• App rating: <strong>&gt;4.7★</strong></li>
                         </ul>
                     </div>
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
-                        <h3 class="font-bold mb-2">🎯 Overall Target</h3>
-                        <p class="text-3xl font-bold">UX Score: 5.2 → 8.5+</p>
-                        <p class="text-sm opacity-90 mt-2">Within 12 months</p>
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 sm:p-6 rounded-xl shadow-lg">
+                        <h3 class="font-bold text-sm sm:text-base mb-2">🎯 Overall Target</h3>
+                        <p class="text-2xl sm:text-3xl font-bold">UX Score: 5.2 → 8.5+</p>
+                        <p class="text-xs sm:text-sm opacity-90 mt-2">Within 12 months</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 19: Strategic Recommendations -->
+    <!-- Slide 22: Strategic Recommendations -->
     <div class="slide">
-        <div class="container mx-auto px-16 flex flex-col justify-center">
-            <h2 class="text-5xl font-bold text-gray-800 mb-12">Strategic Recommendations</h2>
-            <div class="grid grid-cols-2 gap-8">
-                <div class="space-y-6">
-                    <div class="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-2xl">
-                        <h3 class="text-2xl font-bold text-red-700 mb-4">🚫 Stop Doing</h3>
-                        <ul class="space-y-2 text-gray-700">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center py-8">
+            <h2 class="text-responsive-5xl font-bold text-gray-800 mb-6 sm:mb-12">Strategic Recommendations</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div class="space-y-4 sm:space-y-6">
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-red-700 mb-3 sm:mb-4">🚫 Stop Doing</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-700">
                             <li>• Adding features without improving usability</li>
                             <li>• Changing layout/navigation setiap update</li>
                             <li>• Notification spam tanpa segmentasi</li>
                             <li>• Forced actions (rating, review)</li>
                         </ul>
                     </div>
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl">
-                        <h3 class="text-2xl font-bold text-green-700 mb-4">✅ Start Doing</h3>
-                        <ul class="space-y-2 text-gray-700">
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                        <h3 class="text-xl sm:text-2xl font-bold text-green-700 mb-3 sm:mb-4">✅ Start Doing</h3>
+                        <ul class="space-y-2 text-xs sm:text-sm text-gray-700">
                             <li>• User testing sebelum release</li>
                             <li>• A/B testing untuk major changes</li>
                             <li>• Regular usability audits</li>
@@ -720,24 +1012,24 @@
                         </ul>
                     </div>
                 </div>
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl">
-                    <h3 class="text-2xl font-bold text-blue-700 mb-6">🎯 Design Philosophy</h3>
-                    <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-800 mb-2">Less is More</h4>
-                            <p class="text-sm text-gray-600">Simplify before adding features</p>
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold text-blue-700 mb-4 sm:mb-6">🎯 Design Philosophy</h3>
+                    <div class="space-y-3 sm:space-y-4">
+                        <div class="bg-white p-3 sm:p-4 rounded-xl">
+                            <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-1 sm:mb-2">Less is More</h4>
+                            <p class="text-xs sm:text-sm text-gray-600">Simplify before adding features</p>
                         </div>
-                        <div class="bg-white p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-800 mb-2">Consistency First</h4>
-                            <p class="text-sm text-gray-600">Predictability over novelty</p>
+                        <div class="bg-white p-3 sm:p-4 rounded-xl">
+                            <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-1 sm:mb-2">Consistency First</h4>
+                            <p class="text-xs sm:text-sm text-gray-600">Predictability over novelty</p>
                         </div>
-                        <div class="bg-white p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-800 mb-2">User Control</h4>
-                            <p class="text-sm text-gray-600">Empower, don't force</p>
+                        <div class="bg-white p-3 sm:p-4 rounded-xl">
+                            <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-1 sm:mb-2">User Control</h4>
+                            <p class="text-xs sm:text-sm text-gray-600">Empower, don't force</p>
                         </div>
-                        <div class="bg-white p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-800 mb-2">Quality > Quantity</h4>
-                            <p class="text-sm text-gray-600">Perfect few features well</p>
+                        <div class="bg-white p-3 sm:p-4 rounded-xl">
+                            <h4 class="font-bold text-sm sm:text-base text-gray-800 mb-1 sm:mb-2">Quality > Quantity</h4>
+                            <p class="text-xs sm:text-sm text-gray-600">Perfect few features well</p>
                         </div>
                     </div>
                 </div>
@@ -745,24 +1037,24 @@
         </div>
     </div>
 
-    <!-- Slide 20: Thank You -->
+    <!-- Slide 23: Thank You -->
     <div class="slide" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-        <div class="container mx-auto px-16 flex flex-col justify-center items-center text-white text-center">
-            <div class="fade-in">
-                <div class="text-8xl mb-8">🎯</div>
-                <h2 class="text-6xl font-bold mb-8">Terima Kasih</h2>
-                <p class="text-2xl mb-12 opacity-90">Evaluasi UX Tokopedia</p>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-8 rounded-2xl max-w-2xl">
-                    <h3 class="text-2xl font-bold mb-4">Key Takeaways</h3>
-                    <ul class="text-left space-y-3 text-lg">
+        <div class="container mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center items-center text-white text-center">
+            <div class="fade-in max-w-3xl">
+                <div class="text-6xl sm:text-8xl mb-6 sm:mb-8">🎯</div>
+                <h2 class="text-responsive-6xl font-bold mb-6 sm:mb-8">Terima Kasih</h2>
+                <p class="text-responsive-2xl mb-8 sm:mb-12 opacity-90">Evaluasi UX Tokopedia</p>
+                <div class="bg-white bg-opacity-20 backdrop-blur p-6 sm:p-8 rounded-xl sm:rounded-2xl">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Key Takeaways</h3>
+                    <ul class="text-left space-y-2 sm:space-y-3 text-sm sm:text-lg">
                         <li>✅ 15 usulan perbaikan across 5 kriteria usability</li>
                         <li>✅ Focus pada simplicity, consistency, dan user control</li>
                         <li>✅ Expected improvement: UX Score 5.2 → 8.5+</li>
                         <li>✅ Timeline: 12 bulan dengan phased approach</li>
                     </ul>
                 </div>
-                <div class="mt-12">
-                    <p class="text-xl opacity-80">Apakah ada pertanyaan? Jika ada jangan di pertanyakan!!TerimaKasih</p>
+                <div class="mt-8 sm:mt-12">
+                    <p class="text-base sm:text-xl opacity-80">Apakah ada pertanyaan? Jika ada jangan di pertanyakan!! Terima Kasih</p>
                 </div>
             </div>
         </div>
@@ -792,9 +1084,11 @@
             if (currentSlide === 3) {
                 setTimeout(() => {
                     const circle = document.querySelector('.progress-circle');
-                    const score = 5.2;
-                    const offset = 339.292 - (339.292 * score / 10);
-                    circle.style.strokeDashoffset = offset;
+                    if (circle) {
+                        const score = 5.2;
+                        const offset = 339.292 - (339.292 * score / 10);
+                        circle.style.strokeDashoffset = offset;
+                    }
                 }, 300);
             }
         }
@@ -824,10 +1118,46 @@
             }
         });
         
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next slide
+                    nextSlide();
+                } else {
+                    // Swipe right - previous slide
+                    prevSlide();
+                }
+            }
+        }
+        
         // Initialize
         updateSlide();
+        
+        // Prevent zoom on double tap for iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
     </script>
 </body>
-
 </html>
-
